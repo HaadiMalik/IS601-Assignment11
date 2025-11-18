@@ -364,3 +364,49 @@ def test_polymorphic_method_calling():
         result = calc.get_result()
         assert result == expected, \
             f"{calc_type} failed: expected {expected}, got {result}"
+
+
+# ============================================================================
+# Added tests for coverage
+# ============================================================================
+
+def test_get_result_not_implemented():
+    """
+    Test that calling get_result() on the base Calculation class raises
+    a NotImplementedError, as the method is meant to be implemented by subclasses.
+    """
+    with pytest.raises(NotImplementedError):
+        calc = Calculation(user_id=dummy_user_id(), inputs=[1, 2, 3])
+        calc.get_result()
+
+
+def test_calculation_repr():
+    """
+    Test the __repr__ method for the Calculation class and its subclasses.
+    """
+    inputs = [10, 5, 3.5]
+    calc = Addition(user_id=dummy_user_id(), inputs=inputs)
+    
+    expected_repr = f"<Calculation(type=addition, inputs={inputs})>"
+    assert repr(calc) == expected_repr, f"Expected {expected_repr}, got {repr(calc)}"
+
+
+def test_invalid_inputs_for_calculation():
+    """
+    Test that providing fewer than two numbers to any calculation raises a ValueError.    
+    """
+    calculation_types = [
+        Addition,
+        Subtraction,
+        Multiplication,
+        Division,
+    ]
+    
+    for calc_type in calculation_types:
+        calc = calc_type(user_id=dummy_user_id(), inputs=[5])
+        with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
+            calc.get_result()
+
+        calc = calc_type(user_id=dummy_user_id(), inputs="not-a-list")
+        with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
+            calc.get_result()
